@@ -1,22 +1,45 @@
+const CACHE_NAME = "element-intervention-v2";
+const FILES_TO_CACHE = [
+  "./",
+  "index.html",
+  "data.js",
+  "manifest.json",
+  "icon.svg",
+  "logo.png"
+];
+
 self.addEventListener("install", function(event) {
+  self.skipWaiting();
+
   event.waitUntil(
-    caches.open("element-intervention-v1").then(function(cache) {
-      return cache.addAll([
-        "./",
-        "index.html",
-        "data.js",
-        "manifest.json",
-        "icon.svg"
-      ]);
+    caches.open(CACHE_NAME).then(function(cache) {
+      return cache.addAll(FILES_TO_CACHE);
+    })
+  );
+});
+
+self.addEventListener("activate", function(event) {
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.map(function(cacheName) {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(function() {
+      return self.clients.claim();
     })
   );
 });
 
 self.addEventListener("fetch", function(event) {
   if (event.request.method !== "GET") return;
+
   event.respondWith(
-    caches.match(event.request).then(function(response) {
-      return response || fetch(event.request);
+    fetch(event.request).catch(function() {
+      return caches.match(event.request);
     })
   );
 });
