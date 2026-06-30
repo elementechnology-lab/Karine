@@ -1,4 +1,4 @@
-const CACHE_NAME = "element-intervention-v2";
+const CACHE_NAME = "element-intervention-v4";
 const FILES_TO_CACHE = [
   "./",
   "index.html",
